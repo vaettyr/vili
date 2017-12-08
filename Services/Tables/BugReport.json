@@ -1,0 +1,1 @@
+{"table_name":"BugReport","table_type":"BASIC","columns":{"Description":{"type":"TEXT"},"Email":{"type":"VARCHAR(200)"},"Notify":{"type":"BIT(1)"}}}

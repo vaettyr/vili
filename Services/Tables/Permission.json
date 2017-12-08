@@ -1,0 +1,1 @@
+{"table_name":"Permission","table_type":"BASIC","columns":{"Name":{"type":"VARCHAR(100)"},"Workspace":{"type":"INT(11)"},"Parent":{"type":"INT(11)"},"Flags":{"type":"TEXT"},"Alias":{"type":"VARCHAR(100)"},"DisplayOrder":{"type":"INT(11)"}},"children":["RolePermission"]}

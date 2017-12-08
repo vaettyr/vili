@@ -1,0 +1,14 @@
+{
+	"CommitteeType": {
+		"Access" : true
+	},
+	"OfficerType": {
+		"Access" : true
+	},
+	"Lookup": {
+		"Access" : true
+	},
+	"FilingEntity": {
+		"Create": true
+	}
+}

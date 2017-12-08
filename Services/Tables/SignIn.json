@@ -1,0 +1,1 @@
+{"table_name":"SignIn","table_type":"SIMPLE","columns":{"RequestAddress":{"type":"VARCHAR(45)"},"CipherKey":{"type":"VARCHAR(45)"},"RequestResult":{"type":"BIT(1)"},"ForwardAddress":{"type":"VARCHAR(45)"}}}

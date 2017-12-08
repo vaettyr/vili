@@ -1,0 +1,1 @@
+{"table_name":"books","table_type":"BASIC","columns":{"title":{"type":"VARCHAR(200)"},"author":{"type":"VARCHAR(100)"},"has_read":{"type":"BIT(1)"}}}

@@ -1,0 +1,1 @@
+{"table_name":"characters","table_type":"VERSIONED","columns":{"name":{"type":"VARCHAR(200)"},"level":{"type":"INT(11)"},"data":{"type":"TEXT"}}}

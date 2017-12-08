@@ -1,0 +1,1 @@
+{"table_name":"warriors","table_type":"SIMPLE","columns":{"name":{"type":"VARCHAR(150)"},"age":{"type":"INT(11)"}}}

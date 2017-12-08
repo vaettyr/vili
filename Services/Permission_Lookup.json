@@ -1,0 +1,23 @@
+{
+	"Workspace" : {
+		"Access" : null
+	},
+	"Permission" : {
+		"Access" : null
+	},
+	"RolePermission" : {
+		"Access" : {"Permission" : "Role","Flag": null},
+		"Create" : {"Permission" : "Role","Flag": "Create"},
+		"Update" : {"Permission" : "Role","Flag": "Update"},
+		"Delete" : {"Permission" : "Role","Flag": "Delete"}
+	},
+	"Lookup": {
+		"Access": null
+	},
+	"LookupType": {
+		"Access" : {"Permission" : "Lookup", "Flag": null}
+	},
+	"CommitteeType": {
+		"Access" : null
+	}
+}

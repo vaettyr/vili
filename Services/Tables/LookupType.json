@@ -1,0 +1,1 @@
+{"table_name":"LookupType","table_type":"BASIC","columns":{"Name":{"type":"VARCHAR(50)"},"Description":{"type":"VARCHAR(200)"},"SystemOnly":{"type":"BIT(1)"},"Structure":{"type":"TEXT"}},"children":["Lookup"]}

@@ -1,0 +1,1 @@
+{"table_name":"ReportingPeriod","table_type":"BASIC","columns":{"Name":{"type":"VARCHAR(20)"},"Form":{"type":"INT(11)"},"Begin":{"type":"DATETIME"},"End":{"type":"DATETIME"},"Due":{"type":"DATETIME"},"Start":{"type":"DATETIME"},"FilingCycle":{"type":"INT(11)"}}}

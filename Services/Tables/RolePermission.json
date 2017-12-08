@@ -1,0 +1,1 @@
+{"table_name":"RolePermission","table_type":"BASIC","columns":{"Role":{"type":"INT(11)"},"Permission":{"type":"INT(11)"},"Flags":{"type":"TEXT"}}}

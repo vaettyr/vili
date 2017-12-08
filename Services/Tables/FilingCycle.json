@@ -1,0 +1,1 @@
+{"table_name":"FilingCycle","table_type":"BASIC","columns":{"Name":{"type":"VARCHAR(200)"},"Begin":{"type":"DATETIME"},"End":{"type":"DATETIME"},"Election":{"type":"INT(11)"},"Open":{"type":"DATETIME"},"Close":{"type":"DATETIME"},"Restrictions":{"type":"TEXT"}},"children":["ReportingPeriod"]}

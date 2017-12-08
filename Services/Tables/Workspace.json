@@ -1,0 +1,1 @@
+{"table_name":"Workspace","table_type":"BASIC","columns":{"Name":{"type":"VARCHAR(100)"},"Path":{"type":"VARCHAR(100)"}},"references":["Role"]}

@@ -1,0 +1,1 @@
+{"table_name":"Status","table_type":"BASIC","columns":{"Name":{"type":"VARCHAR(200)"},"Filters":{"type":"TEXT"}},"references":["FilingEntity","FilingAgent"]}

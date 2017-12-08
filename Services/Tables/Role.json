@@ -1,0 +1,1 @@
+{"table_name":"Role","table_type":"BASIC","columns":{"Name":{"type":"VARCHAR(100)"},"Workspace":{"type":"INT(11)"},"SystemOnly":{"type":"BIT(1)"}},"children":["RolePermission","OfficerType"],"references":["UserAgent"]}

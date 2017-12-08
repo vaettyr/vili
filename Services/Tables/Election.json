@@ -1,0 +1,1 @@
+{"table_name":"Election","table_type":"BASIC","columns":{"Name":{"type":"VARCHAR(200)"},"Type":{"type":"VARCHAR(20)"},"PrimaryDate":{"type":"DATETIME"},"PrimaryRunoffDate":{"type":"DATETIME"},"GeneralDate":{"type":"DATETIME"},"GeneralRunoffDate":{"type":"DATETIME"}},"children":["FilingCycle"]}

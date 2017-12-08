@@ -1,0 +1,1 @@
+{"table_name":"LOG","table_type":"BASIC","columns":{"TYPE":{"type":"VARCHAR(20)"},"NAME":{"type":"VARCHAR(100)"},"STATUS":{"type":"VARCHAR(20)"},"PARAMS":{"type":"VARCHAR(500)"},"PAYLOAD":{"type":"TEXT"},"RESULT":{"type":"TEXT"}}}

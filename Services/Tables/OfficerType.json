@@ -1,0 +1,1 @@
+{"table_name":"OfficerType","table_type":"BASIC","columns":{"Name":{"type":"VARCHAR(200)"},"Role":{"type":"INT(11)"},"CreateAccount":{"type":"INT(2)"},"SystemOnly":{"type":"BIT(1)"}}}

@@ -1,0 +1,1 @@
+{"table_name":"JurisdictionType","table_type":"BASIC","columns":{"Name":{"type":"VARCHAR(200)"},"Description":{"type":"VARCHAR(500)"}},"children":["Jurisdiction"],"references":["Office"]}

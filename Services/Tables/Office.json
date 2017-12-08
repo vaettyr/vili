@@ -1,0 +1,1 @@
+{"table_name":"Office","table_type":"BASIC","columns":{"Name":{"type":"VARCHAR(200)"},"NonPartisan":{"type":"BIT(1)"},"JurisdictionType":{"type":"INT(11)"},"HasDistricts":{"type":"BIT(1)"},"Office":{"type":"INT(11)"},"BallotGroup":{"type":"VARCHAR(200)"},"Jurisdiction":{"type":"INT(11)"},"DisplayOrder":{"type":"INT(11)"}},"children":["Office"]}
