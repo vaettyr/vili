@@ -1,0 +1,1 @@
+{"table_name":"DataSourceAction","table_type":"BASIC","columns":{"DataSource":{"type":"INT(11)"},"ActionType":{"type":"INT(11)"},"DataSourceTrigger":{"type":"INT(11)"},"Reference":{"type":"INT(11)"},"ExecuteOrder":{"type":"INT(11)"},"Parameters":{"type":"TEXT"}}}

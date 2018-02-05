@@ -11,6 +11,18 @@
 		"Update" : {"Permission" : "Role","Flag": "Update"},
 		"Delete" : {"Permission" : "Role","Flag": "Delete"}
 	},
+	"Election": {
+		"Access" : {"Permission" : "FilingCycle","Flag": null},
+		"Create" : {"Permission" : "FilingCycle","Flag": "Create"},
+		"Update" : {"Permission" : "FilingCycle","Flag": "Update"},
+		"Delete" : {"Permission" : "FilingCycle","Flag": "Delete"}
+	},
+	"ReportingPeriodTemplate" : {
+		"Access" : {"Permission" : "FilingSchedule","Flag": null},
+		"Create" : {"Permission" : "FilingSchedule","Flag": "Create"},
+		"Update" : {"Permission" : "FilingSchedule","Flag": "Update"},
+		"Delete" : {"Permission" : "FilingSchedule","Flag": "Delete"}
+	},
 	"Lookup": {
 		"Access": null
 	},
@@ -19,5 +31,11 @@
 	},
 	"CommitteeType": {
 		"Access" : null
+	},
+	"DataSource": {
+		"Access": null
+	},
+	"ActionType": {
+		"Access":  null
 	}
 }

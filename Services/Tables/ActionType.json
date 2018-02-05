@@ -1,0 +1,1 @@
+{"table_name":"ActionType","table_type":"BASIC","columns":{"Name":{"type":"VARCHAR(200)"},"Description":{"type":"VARCHAR(500)"},"Parameters":{"type":"TEXT"}}}

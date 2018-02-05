@@ -1,0 +1,1 @@
+{"table_name":"DataSourceTrigger","table_type":"BASIC","columns":{"DataSource":{"type":"INT(11)"},"Name":{"type":"VARCHAR(100)"}}}

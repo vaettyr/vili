@@ -5,6 +5,12 @@
 	"OfficerType": {
 		"Access" : true
 	},
+	"Office": {
+		"Access" : true
+	},
+	"Jurisdiction": {
+		"Access" : true
+	},
 	"Lookup": {
 		"Access" : true
 	},

@@ -1,9 +1,12 @@
 <?php 
 	include_once("../UberService.php");
 	include_once("./Helper.php");
+	include_once("/DataSource/DataSource.php");
 	
 	class DataService extends UberService{
-		function __construct() {
+		
+	    private static $table_dir = "/Tables/";
+	    function __construct() {
 			$query = $_SERVER['QUERY_STRING'];
 			parse_str($query, $qarray);	
 			$open_tables = json_decode(file_get_contents("./Permission_Lookup.json"), true);
@@ -78,18 +81,19 @@
 				}, "Delete", '/'.$this->config['table_name'].'.json');
 				return $this->permissionFunction($this->token, $claim);
 			}));
-
+			
 		}
 		
 		function recursiveJoin($root, $name, $tabletype, $checktype, &$items, $query = null) {
 			//$root is the base table
 			//we create a new table, join the root to it, and run a null query
 			//the first time through, we tack on the query to the root table
-			$schema = json_decode(file_get_contents($name.".json"), true);
+		    $schema = json_decode(file_get_contents(dirname(__FILE__).DataService::$table_dir.$name.".json"), true);
 			$table = new Table($schema);
 			$joinquery = [$root->getName() => "ID"];
 			if($tabletype == "VERSIONED" && $checktype == "children") {
-				$joinquery = ["AND" =>[$joinquery, [$name."_VERSION" => "VERSION"]]];
+				//$joinquery = ["AND" =>[$joinquery, [$name."_VERSION" => "VERSION"]]];
+			    $joinquery[$root->getName()."_VERSION"] = "VERSION";
 			}
 			$table->join($root, $joinquery, "INNER", null, $query);
 			$result = $table->read(null);			

@@ -45,6 +45,7 @@ include_once("Logger.php");
 			}
 			if($type == 'VERSIONED') {
 				$this->columns['VERSION'] = ['type' => 'INT(11)'];
+				$this->columns['LOCKED'] = ['type' => 'BIT(1)'];
 			}
 			$this->joins = array();
 			$this->logger = new Logger();
@@ -285,7 +286,7 @@ include_once("Logger.php");
 		}
 		
 		//update this to handle joins
-		function read($selection = null, $force_all = false, $bypass_log = false) { //force_all will get 'deleted' entries
+		function read($selection = null, $options = ["FORCE_ALL" => false, 'MOST_RECENT' => true], $bypass_log = false, $order = null) { //force_all will get 'deleted' entries
 			try {	
 				$conn = $this::connect();
 				if($conn === false)
@@ -301,9 +302,22 @@ include_once("Logger.php");
 				}
 				//default where clause for easier joins
 				$query = $query." WHERE 1=1 ";
+				$force_all = false;
+				if(!is_null($options) && !empty($options['FORCE_ALL'] && $options['FORCE_ALL'])) {
+				    $force_all = true; 
+				}
 				if(!$force_all) {
-					$query = $query."AND IFNULL(".$this->schema['table_name'].".DELETED, 0) <> 1 ";
-				}			
+				    $query = $query."AND IFNULL(".$this->schema['table_name'].".DELETED, 0) <> 1 ";
+				}
+                $table_type = 'SIMPLE';
+                if(!empty($this->schema['table_type'])) {
+                    $table_type = $this->schema['table_type'];
+                }
+                if($table_type == 'VERSIONED' && (is_null($selection) || !is_null($selection->vars['VERSION']))) {
+                    if(!is_null($options) && !empty($options['MOST_RECENT']) && $options['MOST_RECENT']) {
+                        $query .= "AND ".$this->getName().".VERSION=(SELECT MAX(VERSION) FROM ".$this->getName()." AS V WHERE V.ID = ".$this->getName().".ID) ";
+                    }
+                }
 				if(!is_null($selection) || count($this->joins) > 0) {
 					//echo json_encode($selection);
 					//get a complete list of columns
@@ -331,6 +345,12 @@ include_once("Logger.php");
 						}
 					}
 				}		
+				if(!is_null($order)) {
+				    $query = $query." ORDER BY ";
+				    foreach($order as $column => $direction) {
+				        $query = $query.$column." ".$direction;
+				    }
+				}
 				$query = $query.";";
 	
 				//echo $query;
@@ -379,10 +399,16 @@ include_once("Logger.php");
 		//update ignores joins and only updates the primary table
 		function update($args, $selection = null, $bypass_log = false) {
 			try {
+			    //if this is a versioned table and the record we're updating is locked, create an incremented version instead
+			    $table_type = 'BASIC';
+			    if(array_key_exists('table_type', $this->schema) && strtoupper($this->schema['table_type']) != 'BASIC') {
+			        $table_type = strtoupper($this->schema['table_type']);
+			    }	
+				$records = array();				
 				//build the update query
 				$conn = $this::connect();
 				if($conn === false)
-					return false;
+				    return false;
 				$params = $this->get_params($args);
 				$query = "UPDATE ".$this->schema['table_name']."
 					SET UPDATE_TIMESTAMP = UTC_TIMESTAMP";
@@ -392,12 +418,20 @@ include_once("Logger.php");
 					}
 				}
 				
+				//never updated locked records for any reason
 				if(!is_null($selection)) {					
 					$clause = $selection->toQuery($this->columns);
 					if(!empty($clause)) {
 						$query = $query." WHERE ".$clause;
-					}			
-				}			
+						if($table_type == 'VERSIONED') {
+						    $query .= ' AND COALESCE('.$this->getName().".LOCKED, 0) <> 1";
+						}
+					} else if($table_type == 'VERSIONED') {
+					    $query .= ' WHERE COALESCE('.$this->getName().".LOCKED, 0) <> 1";
+					}
+				} else if($table_type == 'VERSIONED') {
+				    $query .= ' WHERE COALESCE('.$this->getName().".LOCKED, 0) <> 1";
+				}
 				$query = $query.";";
 				//echo $query;
 				if(!$bypass_log) {
@@ -411,36 +445,41 @@ include_once("Logger.php");
 					mysqli_close($conn);
 					return $error;
 				}
-				//get the last inserted record by timestamp (for simple)
-				$selquery = "SELECT ".$this->getColumnsForQuery()."FROM ".$this->schema['table_name'];
-				if(!empty($clause)) {
-					$selquery = $selquery." WHERE ".$clause.";";
-				} else {
-					$selquery = $selquery." WHERE UPDATE_TIMESTAMP =
+				if(mysqli_affected_rows($conn)) {
+				    //get the last inserted record by timestamp (for simple)
+				    $selquery = "SELECT ".$this->getColumnsForQuery()."FROM ".$this->schema['table_name'];
+				    if(!empty($clause)) {
+				        $selquery = $selquery." WHERE ".$clause.";";
+				    } else {
+				        $selquery = $selquery." WHERE UPDATE_TIMESTAMP =
 					(SELECT MAX(UPDATE_TIMESTAMP) FROM ".$this->schema['table_name'].");";
-				}			
-				$result = mysqli_query($conn, $selquery);
-				if(!$result) {
-					$response = new Response(500, mysqli_error($conn));
-					if(!is_null($this->transaction) && isset($this->transaction)) {
-						$this->transaction('rollback');
-						mysqli_close($conn);
-					} else {
-						mysqli_close($conn);
-					}
-					$response->send();
-				}
+				    }
+				    $result = mysqli_query($conn, $selquery);
+				    if(!$result) {
+				        $response = new Response(500, mysqli_error($conn));
+				        if(!is_null($this->transaction) && isset($this->transaction)) {
+				            $this->transaction('rollback');
+				            mysqli_close($conn);
+				        } else {
+				            mysqli_close($conn);
+				        }
+				        $response->send();
+				    }
+				    //select all of them
+				    while($row = mysqli_fetch_assoc($result)) {
+				        //parse the row to see if it contains a boolean value
+				        foreach($row as $key => $field) {
+				            $row[$key] = $this->get_column($key, $field);
+				        }
+				        $records[] = $row;
+				    }
+				}				
 				if(is_null($this->transaction) || !isset($this->transaction)) {
 					mysqli_close($conn);
-				}	
-				//select all of them
-				$records = array();
-				while($row = mysqli_fetch_assoc($result)) {
-					//parse the row to see if it contains a boolean value
-					foreach($row as $key => $field) {
-						$row[$key] = $this->get_column($key, $field);
-					}
-					$records[] = $row;
+				}					
+				$new_records = $this->updateLocked($table_type, $args, $selection, $bypass_log);
+				foreach($new_records as $new_record) {
+				    $records[] = $new_record;
 				}
 				if(!$bypass_log) {
 					$action['PROCESS'] = 'END';
@@ -694,10 +733,54 @@ include_once("Logger.php");
 			
 		}
 		
+		private function updateLocked($table_type, $args, $selection, $bypass_log = false) {
+		    $records = array();
+		   	    
+		    //check to see if we're attempting to update a locked versioned record
+		    if($table_type == 'VERSIONED' && !is_null($selection)) {
+		        $locked_query = "SELECT ID, VERSION, LOCKED FROM ".$this->schema['table_name'];
+		        $clause = $selection->toQuery($this->columns);
+		        if(!empty($clause)) {
+		            $locked_query .= " WHERE ".$clause.";";
+		        }
+		        //build the update query
+		        $conn = $this::connect();
+		        if($conn === false)
+		            return false;
+	            $is_locked = mysqli_query($conn, $locked_query);
+	            if(!$is_locked) {
+	                $response = new Response(500, mysqli_error($locked_conn));
+	                if(!is_null($this->transaction) && isset($this->transaction)) {
+	                    $this->transaction('rollback');
+	                    mysqli_close($locked_conn);
+	                } else {
+	                    mysqli_close($locked_conn);
+	                }
+	                $response->send();
+	            }
+	            $create_rows = array();
+	            while($row = mysqli_fetch_assoc($is_locked)) {
+	                if($row && !empty($row['LOCKED'])) {
+	                    $temp_args = $args;
+	                    $temp_args['ID'] = $row['ID'];
+	                    if(!empty($temp_args['LOCKED'])) {
+	                        unset($temp_args['LOCKED']);
+	                    }
+	                    $create_rows[] = $temp_args;
+	                }
+	            }
+	            mysqli_close($conn);
+	            foreach($create_rows as $crow) {
+	               $records[] = $this->create($crow, $bypass_log);
+	            }
+		    }
+		    return $records;
+		}
+		
 		private function get_params($args) {
 			$params = Array();			
 			foreach($args as $name => $value) {
-				if(array_key_exists($name, $this->schema['columns']) || $name == 'ID') {
+				if(array_key_exists($name, $this->schema['columns']) || $name == 'ID' || ($name == 'LOCKED' && $this->schema['table_type'] == 'VERSIONED')) {
 					$params[] = ['name' => $name, 'value' => $this->get_value($value, $name)];
 				}
 			}					
@@ -745,7 +828,7 @@ include_once("Logger.php");
 			if($table_type == "BASIC") {
 				$query = $query.", ID INT NOT NULL AUTO_INCREMENT";
 			} else if($table_type == "VERSIONED") {
-				$query = $query.", ID INT NOT NULL, VERSION INT NOT NULL";
+				$query = $query.", ID INT NOT NULL, VERSION INT NOT NULL, LOCKED BIT NULL";
 			}
 			//add the columns
 			foreach($this->schema['columns'] as $name => $data) {
@@ -800,7 +883,7 @@ include_once("Logger.php");
 			//go through the database structure to see if any need to be deleted, skip the default columns
 			foreach($columns as $name => $data) {
 				if(!array_key_exists($name, $this->schema['columns']) && $name != 'ID' && $name != 'CREATE_TIMESTAMP' 
-						&& $name != 'UPDATE_TIMESTAMP' && $name != 'VERSION' && $name != 'DELETED') {
+						&& $name != 'UPDATE_TIMESTAMP' && $name != 'VERSION' && $name != 'DELETED' && $name != 'LOCKED') {
 					$delete[] = ['name' => $name, 'data' => $data];
 				}
 			}
@@ -818,6 +901,9 @@ include_once("Logger.php");
 				if(array_key_exists('VERSION', $columns)) {
 					$delete[] = ['name' => 'VERSION', 'data' => $columns['VERSION']];
 				}
+				if(array_key_exists('LOCKED', $columns)) {
+				    $delete[] = ['name' => 'LOCKED', 'data' => $columns['LOCKED']];
+				}
 			} else if ($table_type == "BASIC") {
 				if(!array_key_exists('ID', $columns)) {
 					$add[] = ['name' => 'ID', 'data' => ['type' => 'INT NOT NULL AUTO_INCREMENT PRIMARY KEY']];
@@ -825,6 +911,9 @@ include_once("Logger.php");
 				//set a default value for the id
 				if(array_key_exists('VERSION', $columns)) {
 					$delete[] = ['name' => 'VERSION', 'data' => $columns['VERSION']];
+				}
+				if(array_key_exists('LOCKED', $columns)) {
+				    $delete[] = ['name' => 'LOCKED', 'data' => $columns['LOCKED']];
 				}
 			} else {
 				if(!array_key_exists('ID', $columns)) {
@@ -835,6 +924,9 @@ include_once("Logger.php");
 				if(!array_key_exists('VERSION', $columns)) {
 					$add[] = ['name' => 'VERSION', 'data' => ['type' => 'INT NOT NULL']];
 					$addVERSION = true;
+				}
+				if(!array_key_exists('LOCKED', $columns)) {
+				    $add[] = ['name' => 'LOCKED', 'data' => ['type' => 'BIT NULL']];
 				}
 			}
 			//build the query	

@@ -1,1 +1,1 @@
-{"table_name":"Form","table_type":"BASIC","columns":{"Name":{"type":"VARCHAR(200)"},"Template":{"type":"VARCHAR(200)"},"DisplayOrder":{"type":"INT(11)"}}}
+{"table_name":"Form","table_type":"BASIC","columns":{"Name":{"type":"VARCHAR(200)"},"Data":{"type":"TEXT"},"DataSource":{"type":"INT(11)"},"DisplayOrder":{"type":"INT(11)"}}}

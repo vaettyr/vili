@@ -1,0 +1,1 @@
+{"table_name":"DataSource","table_type":"BASIC","columns":{"Name":{"type":"VARCHAR(200)"},"Root":{"type":"VARCHAR(200)"},"Definition":{"type":"VARCHAR(200)"},"Reference":{"type":"VARCHAR(200)"}},"children":["DataSourceJoin"]}
